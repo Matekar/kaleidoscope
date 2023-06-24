@@ -38,7 +38,7 @@ class GUIMyFrame1 : public MyFrame1
 		void Move_Y( wxScrollEvent& event );
 		void Interpolate( wxCommandEvent& event );
 		void SaveFile( wxCommandEvent& event );
-		void whateverthisis( wxCommandEvent& event );
+		void Animate( wxCommandEvent& event );
 
 		void Repaint();
 

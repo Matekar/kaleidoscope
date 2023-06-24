@@ -29,6 +29,12 @@ MyFrame1( parent )
 
     int axes_count = 0;
     std::vector<int> axes;
+
+
+    count_scrollBar->SetScrollbar(0, 1, 20, 1, true);
+    angle_scrollBar->SetScrollbar(0, 1, 360, 1, true);
+    x_scrollBar->SetScrollbar(100, 1, 201, 1, true);
+    y_scrollBar->SetScrollbar(100, 1, 201, 1, true);
 }
 
 void GUIMyFrame1::OpenFile( wxCommandEvent& event )
@@ -60,13 +66,9 @@ void GUIMyFrame1::OpenFile( wxCommandEvent& event )
     int size = newImage.GetSize().x > newImage.GetSize().y ? newImage.GetSize().y : newImage.GetSize().x;
     newImage.Resize(wxSize(size, size), wxPoint(0, 0));
     newImage.Rescale(this->m_panel1->GetSize().x, this->m_panel1->GetSize().y);
-    //newImage = newImage.Rotate(90* 3.1415926 / 180, wxPoint(m_panel1->GetSize().x/2, m_panel1->GetSize().y/2));
 
     this->original = newImage;
     this->copy = this->original.Copy();
-
-    //Mat newMap = imread(static_cast<std::string>(openFileDialog.GetPath()), IMREAD_COLOR);
-    //this->orig = newMap;
 
 
     Repaint();
@@ -80,22 +82,31 @@ void GUIMyFrame1::Revert( wxCommandEvent& event )
 
 void GUIMyFrame1::Recount_Axes( wxScrollEvent& event )
 {
+    int new_val = this->count_scrollBar->GetThumbPosition() + 1;
+    this->countval_staticText->SetLabel(std::to_string(new_val));
 // TODO: Implement Recount_Axes
-    // Tutaj wszystkie obliczenia ig
 }
 
 void GUIMyFrame1::Change_Angle( wxScrollEvent& event )
 {
+    int new_val = this->angle_scrollBar->GetThumbPosition();
+    this->angleval_staticText->SetLabel(std::to_string(new_val));
 // TODO: Implement Change_Angle
 }
 
 void GUIMyFrame1::Move_X( wxScrollEvent& event )
 {
+    int new_val = this->x_scrollBar->GetThumbPosition() - 100;
+    std::string new_string = std::to_string(new_val) + "%";
+    this->xval_staticText->SetLabel(new_string);
 // TODO: Implement Move_X
 }
 
 void GUIMyFrame1::Move_Y( wxScrollEvent& event )
 {
+    int new_val = this->y_scrollBar->GetThumbPosition() - 100;
+    std::string new_string = std::to_string(new_val) + "%";
+    this->yval_staticText->SetLabel(new_string);
 // TODO: Implement Move_Y
 }
 
@@ -106,12 +117,23 @@ void GUIMyFrame1::Interpolate( wxCommandEvent& event )
 
 void GUIMyFrame1::SaveFile( wxCommandEvent& event )
 {
-// TODO: Implement SaveFile
+    wxFileDialog saveFileDialog(this, _("Save file"), "", "", "PNG files (*.png)|*.png | BITMAP files (*. bmp)|*.bmp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    if (saveFileDialog.ShowModal() == wxID_CANCEL) return;
+    int tmp = saveFileDialog.GetFilterIndex();
+    wxString name = saveFileDialog.GetFilename();
+    switch (tmp) {
+    case 0:
+        this->copy.SaveFile(name, wxBITMAP_TYPE_PNG);
+        break;
+    case 1:
+        this->copy.SaveFile(name, wxBITMAP_TYPE_BMP);
+        break;
+    }
 }
 
-void GUIMyFrame1::whateverthisis( wxCommandEvent& event )
+void GUIMyFrame1::Animate( wxCommandEvent& event )
 {
-// TODO: Implement whateverthisis
+// TODO: Implement Animate
 }
 
 void GUIMyFrame1::Repaint() {

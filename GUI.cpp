@@ -21,7 +21,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	m_panel1 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxSize( 600,600 ), wxTAB_TRAVERSAL );
 	m_panel1->SetMinSize( wxSize( 600,600 ) );
-	m_panel1->SetMaxSize( wxSize( 900,900 ) );
+	m_panel1->SetMaxSize( wxSize( 1000,1000 ) );
 
 	panel_sizer->Add( m_panel1, 1, wxEXPAND | wxALL, 5 );
 
@@ -105,7 +105,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 
 	controls_sizer->Add( y_sizer, 0, wxEXPAND|wxALIGN_CENTER_HORIZONTAL, 5 );
 
-	wxString interpolator_choiceChoices[] = { wxT("Choose Interpolator"), wxT("Interpolator 1"), wxT("Itnerpolator 2"), wxEmptyString, wxEmptyString };
+	wxString interpolator_choiceChoices[] = { wxT("Choose Interpolator"), wxT("Nearest Neighbor"), wxT("Bilinear")};
 	int interpolator_choiceNChoices = sizeof( interpolator_choiceChoices ) / sizeof( wxString );
 	interpolator_choice = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, interpolator_choiceNChoices, interpolator_choiceChoices, 0 );
 	interpolator_choice->SetSelection( 0 );
@@ -121,12 +121,13 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	all_sizer->Add( controls_sizer, 1, wxEXPAND, 5 );
 
 
-	this->SetSizer( all_sizer );
+	this->SetSizerAndFit( all_sizer );
 	this->Layout();
 
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	m_panel1->Connect(wxEVT_SIZE, wxSizeEventHandler(MyFrame1::Resize), NULL, this);
 	open_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::OpenFile ), NULL, this );
 	revert_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::Revert ), NULL, this );
 	count_scrollBar->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( MyFrame1::Recount_Axes ), NULL, this );
@@ -175,6 +176,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 MyFrame1::~MyFrame1()
 {
 	// Disconnect Events
+	m_panel1->Disconnect(wxEVT_SIZE, wxSizeEventHandler(MyFrame1::Resize), NULL, this);
 	open_button->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::OpenFile ), NULL, this );
 	revert_button->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::Revert ), NULL, this );
 	count_scrollBar->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( MyFrame1::Recount_Axes ), NULL, this );

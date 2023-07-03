@@ -3,10 +3,6 @@
 #include <stdlib.h>
 #include "vecmat.h"
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/core/mat.hpp>
-
 #if defined(__WXMSW__)
 #ifdef wxHAVE_RAW_BITMAP
 #include "wx/rawbmp.h"
@@ -34,6 +30,7 @@ MyFrame1( parent )
 
     curr_x = 0;
     curr_y = 0;
+    interpol = 1;
 
     count_scrollBar->SetScrollbar(0, 0, 20, 1, true);
     angle_scrollBar->SetScrollbar(0, 1, 360, 1, true);
@@ -67,8 +64,7 @@ void GUIMyFrame1::OpenFile( wxCommandEvent& event )
     newImage.LoadFile(openFileDialog.GetPath());
 
     // Load/Create a circular mask
-    this->mask.LoadFile("mask.png");
-    //CreateMask();
+    //this->mask.LoadFile("mask.png");=
 
     // Resizing the image to square (initial image does not have to be square, but it will be cropped)
     int size = newImage.GetSize().x > newImage.GetSize().y ? newImage.GetSize().y : newImage.GetSize().x;
@@ -83,6 +79,8 @@ void GUIMyFrame1::OpenFile( wxCommandEvent& event )
     this->original = newImage;
     this->shifted = this->original.Copy();
     this->copy = this->shifted.Copy();
+
+    CreateMask(this->copy.GetWidth(), this->copy.GetHeight());
 
     Extend();
 
@@ -113,6 +111,8 @@ void GUIMyFrame1::Revert( wxCommandEvent& event )
 void GUIMyFrame1::Recount_Axes( wxScrollEvent& event )
 {
     // Function for changing axes count
+
+    this->copy = this->shifted.Copy();
 
     int new_val = this->count_scrollBar->GetThumbPosition();
     this->countval_staticText->SetLabel(std::to_string(new_val));
@@ -164,6 +164,10 @@ void GUIMyFrame1::Move_X(wxScrollEvent& event)
     this->shifted = tmpbmp.ConvertToImage();
     this->copy = this->shifted.Copy();
 
+    for (int i = 0; i < axes_count; i++) {
+        Reflect(angle + this->axes_angle * i);
+    }
+
     Repaint();
 }
 
@@ -187,13 +191,19 @@ void GUIMyFrame1::Move_Y(wxScrollEvent& event)
     this->shifted = tmpbmp.ConvertToImage();
     this->copy = this->shifted.Copy();
 
+    for (int i = 0; i < axes_count; i++) {
+        Reflect(angle + this->axes_angle * i);
+    }
+
     Repaint();
 }
 
 void GUIMyFrame1::Interpolate( wxCommandEvent& event )
 {
 // TODO: Implement Interpolate
-    this->extended.SaveFile("lol.png", wxBITMAP_TYPE_PNG);
+    this->interpol = interpolator_choice->GetSelection();
+    this->test_var = this->interpol;
+    Repaint();
 }
 
 void GUIMyFrame1::SaveFile( wxCommandEvent& event )
@@ -244,6 +254,7 @@ void GUIMyFrame1::Repaint() {
         height = this->copy.GetHeight();
     
     this->copy.SetMaskFromImage(this->mask, 0, 0, 0);
+    if (this->interpol != 0) this->copy = this-> interpol == 1 ? NearestNeighborInterpolation(this->copy, width, height) : BilinearInterpolation(this->copy, width, height);
     dc.DrawBitmap(wxBitmap(this->copy), wxPoint(0, 0));
 
     // FOR TESTING. NO RELATION TO THE FINAL VERSION
@@ -256,7 +267,8 @@ void GUIMyFrame1::Repaint() {
     //dc.DrawLine(testing_variable4.GetX(), testing_variable4.GetY(), testing_variable1.GetX(), testing_variable1.GetY());
 
     //dc.SetBrush(*wxWHITE_BRUSH);
-    //dc.DrawText(std::to_string(test_var), 50, 50);
+    //dc.SetPen(*wxWHITE_PEN);
+    //dc.DrawText(std::to_string(this->test_var), width, height);
 }
 
 void GUIMyFrame1::Reflect(int angle) {
@@ -344,21 +356,143 @@ void GUIMyFrame1::Extend() {
     delete TempBMP;
 }
 
-void GUIMyFrame1::CreateMask() {
+void GUIMyFrame1::CreateMask(int width, int height) {
     // Image for creating a circular mask
-    // DOES NOT WORK
 
-    wxBitmap maskbmp = wxBitmap(copy.GetWidth(), copy.GetHeight());
-    wxMemoryDC memdc(maskbmp);
+    double x0 = width / 2;
+    double y0 = height / 2;
+    double r = x0 < y0 ? y0 : x0;
 
-    memdc.SetBackground(*wxWHITE_BRUSH);
-    memdc.SetBrush(*wxBLACK_BRUSH);
-    memdc.DrawCircle(this->copy.GetWidth() / 2, this->copy.GetHeight() / 2, this->copy.GetWidth() / 2);
+    this->mask = wxImage(width, height);
 
-    memdc.SelectObject(wxNullBitmap);
+    unsigned char* mask_ = this->mask.GetData();
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            if (pow((x - x0), 2) + pow((y - y0), 2) >= pow(r, 2)) {
+                mask_[y * width * 3 + 3*x + 0] = 0;
+                mask_[y * width * 3 + 3*x + 1] = 0;
+                mask_[y * width * 3 + 3*x + 2] = 0;
+            }
+            else {
+                mask_[y * width * 3 + 3*x + 0] = 255;
+                mask_[y * width * 3 + 3*x + 1] = 255;
+                mask_[y * width * 3 + 3*x + 2] = 255;
+            }
+        }
+    }
+}
+
+wxImage GUIMyFrame1::NearestNeighborInterpolation(const wxImage& inputImage, int newWidth, int newHeight)
+{
+    int oldWidth = inputImage.GetWidth();
+    int oldHeight = inputImage.GetHeight();
+
+    wxImage outputImage(newWidth, newHeight);
+
+    double widthRatio = static_cast<double>(oldWidth) / newWidth;
+    double heightRatio = static_cast<double>(oldHeight) / newHeight;
+
+    for (int y = 0; y < newHeight; ++y)
+    {
+        for (int x = 0; x < newWidth; ++x)
+        {
+            int oldX = static_cast<int>(x * widthRatio);
+            int oldY = static_cast<int>(y * heightRatio);
+
+            wxColor pixelColor(inputImage.GetRed(oldX, oldY),
+                inputImage.GetGreen(oldX, oldY),
+                inputImage.GetBlue(oldX, oldY));
+
+            outputImage.SetRGB(x, y, pixelColor.Red(), pixelColor.Green(), pixelColor.Blue());
+        }
+    }
+
+    return outputImage;
+}
+
+wxImage GUIMyFrame1::BilinearInterpolation(const wxImage& image, float newWidth, float newHeight) {
+    wxImage newImage(newWidth, newHeight);
+
+    for (int y = 0; y < newHeight; y++)
+    {
+        for (int x = 0; x < newWidth; x++)
+        {
+            // Wspó³rzêdne piksela w oryginalnym obrazie
+            double srcX = (double)x / newWidth * (image.GetWidth() - 1);
+            double srcY = (double)y / newHeight * (image.GetHeight() - 1);
+
+            // Indeksy czterech s¹siaduj¹cych pikseli
+            int x1 = (int)srcX;
+            int y1 = (int)srcY;
+            int x2 = x1 + 1;
+            int y2 = y1 + 1;
+
+            // Wspó³czynniki interpolacji
+            double dx = srcX - x1;
+            double dy = srcY - y1;
+
+            // Wartoœci pikseli s¹siaduj¹cych
+           /* wxColour c11[3] = {image.GetRed(x1,y1),image.GetGreen(x1,y1),image.GetBlue(x1,y1)};
+            wxColour c12[3] = { image.GetRed(x1,y2),image.GetGreen(x1,y2),image.GetBlue(x1,y2) };
+            wxColour c21[3] = { image.GetRed(x2,y1),image.GetGreen(x2,y1),image.GetBlue(x2,y1) };
+            wxColour c22[3] = { image.GetRed(x2,y2),image.GetGreen(x2,y2),image.GetBlue(x2,y2) };
+
+            // Interpolacja dla ka¿dego kana³u koloru
+            unsigned char red = (1 - dx) * (1 - dy) * c11[0].Red() + dx * (1 - dy) * c21[0].Red() +
+                (1 - dx) * dy * c12[0].Red() + dx * dy * c22[0].Red();
+            unsigned char green = (1 - dx) * (1 - dy) * c11[1].Green() + dx * (1 - dy) * c21[1].Green() +
+                (1 - dx) * dy * c12[1].Green() + dx * dy * c22[1].Green();
+            unsigned char blue = (1 - dx) * (1 - dy) * c11[2].Blue() + dx * (1 - dy) * c21[2].Blue() +
+                (1 - dx) * dy * c12[2].Blue() + dx * dy * c22[2].Blue();
+                */
 
 
-    mask = maskbmp.ConvertToImage();
+            const unsigned char* data = image.GetData();
+            int bytesPerPixel = image.HasAlpha() ? 4 : 3;
 
-    mask.Rescale(this->copy.GetWidth(), this->copy.GetHeight());  // This line is ignored for some reason
+            int offset11 = (y1 * image.GetWidth() + x1) * bytesPerPixel;
+            int offset12 = (y2 * image.GetWidth() + x1) * bytesPerPixel;
+            int offset21 = (y1 * image.GetWidth() + x2) * bytesPerPixel;
+            int offset22 = (y2 * image.GetWidth() + x2) * bytesPerPixel;
+
+            unsigned char red11 = data[offset11];
+            unsigned char green11 = data[offset11 + 1];
+            unsigned char blue11 = data[offset11 + 2];
+
+            unsigned char red12 = data[offset12];
+            unsigned char green12 = data[offset12 + 1];
+            unsigned char blue12 = data[offset12 + 2];
+
+            unsigned char red21 = data[offset21];
+            unsigned char green21 = data[offset21 + 1];
+            unsigned char blue21 = data[offset21 + 2];
+
+            unsigned char red22 = data[offset22];
+            unsigned char green22 = data[offset22 + 1];
+            unsigned char blue22 = data[offset22 + 2];
+
+            // Interpolacja dla ka¿dego kana³u koloru
+            unsigned char red = (1 - dx) * (1 - dy) * red11 + dx * (1 - dy) * red21 +
+                (1 - dx) * dy * red12 + dx * dy * red22;
+            unsigned char green = (1 - dx) * (1 - dy) * green11 + dx * (1 - dy) * green21 +
+                (1 - dx) * dy * green12 + dx * dy * green22;
+            unsigned char blue = (1 - dx) * (1 - dy) * blue11 + dx * (1 - dy) * blue21 +
+                (1 - dx) * dy * blue12 + dx * dy * blue22;
+
+            // Ustawienie koloru piksela w nowym obrazie
+            newImage.SetRGB(x, y, red, green, blue);
+        }
+    }
+
+    return newImage;
+}
+
+void GUIMyFrame1::Resize(wxSizeEvent& event) {
+    wxSize sizerSize = this->GetSizer()->GetSize();
+    if (sizerSize.GetWidth() > sizerSize.GetHeight() + 260)
+        m_panel1->SetSize(sizerSize.GetHeight(), sizerSize.GetHeight());
+    else {
+        m_panel1->SetSize(sizerSize.GetWidth() - 260, sizerSize.GetWidth() - 260);
+    }
 }

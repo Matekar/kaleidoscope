@@ -47,7 +47,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	count_scrollBar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
 	count_sizer->Add( count_scrollBar, 5, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	countval_staticText = new wxStaticText( this, wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, 0 );
+	countval_staticText = new wxStaticText( this, wxID_ANY, wxT("1"), wxDefaultPosition, wxDefaultSize, 0 );
 	countval_staticText->Wrap( -1 );
 	count_sizer->Add( countval_staticText, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5 );
 
@@ -64,7 +64,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	angle_scrollBar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
 	angle_sizer->Add( angle_scrollBar, 5, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	angleval_staticText = new wxStaticText( this, wxID_ANY, wxT("0"), wxDefaultPosition, wxDefaultSize, 0 );
+	angleval_staticText = new wxStaticText( this, wxID_ANY, wxT("359"), wxDefaultPosition, wxDefaultSize, 0 );
 	angleval_staticText->Wrap( -1 );
 	angle_sizer->Add( angleval_staticText, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
@@ -81,7 +81,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	x_scrollBar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
 	x_sizer->Add( x_scrollBar, 4, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	xval_staticText = new wxStaticText( this, wxID_ANY, wxT("0%"), wxDefaultPosition, wxDefaultSize, 0 );
+	xval_staticText = new wxStaticText( this, wxID_ANY, wxT("-100%"), wxDefaultPosition, wxDefaultSize, 0 );
 	xval_staticText->Wrap( -1 );
 	x_sizer->Add( xval_staticText, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
@@ -98,7 +98,7 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	y_scrollBar = new wxScrollBar( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSB_HORIZONTAL );
 	y_sizer->Add( y_scrollBar, 4, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-	yval_staticText = new wxStaticText( this, wxID_ANY, wxT("0%"), wxDefaultPosition, wxDefaultSize, 0 );
+	yval_staticText = new wxStaticText( this, wxID_ANY, wxT("-100%"), wxDefaultPosition, wxDefaultSize, 0 );
 	yval_staticText->Wrap( -1 );
 	y_sizer->Add( yval_staticText, 1, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
@@ -147,7 +147,6 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	angle_scrollBar->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
 	angle_scrollBar->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
 	angle_scrollBar->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
-
 	x_scrollBar->Connect( wxEVT_SCROLL_TOP, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );
 	x_scrollBar->Connect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );
 	x_scrollBar->Connect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );
@@ -166,7 +165,6 @@ MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, cons
 	y_scrollBar->Connect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( MyFrame1::Move_Y ), NULL, this );
 	y_scrollBar->Connect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( MyFrame1::Move_Y ), NULL, this );
 	y_scrollBar->Connect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( MyFrame1::Move_Y ), NULL, this );
-
 	interpolator_choice->Connect( wxEVT_COMMAND_CHOICE_SELECTED, wxCommandEventHandler( MyFrame1::Interpolate ), NULL, this );
 	save_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::SaveFile ), NULL, this );
 	animate_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( MyFrame1::Animate ), NULL, this );
@@ -195,7 +193,6 @@ MyFrame1::~MyFrame1()
 	angle_scrollBar->Disconnect( wxEVT_SCROLL_THUMBTRACK, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
 	angle_scrollBar->Disconnect( wxEVT_SCROLL_THUMBRELEASE, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
 	angle_scrollBar->Disconnect( wxEVT_SCROLL_CHANGED, wxScrollEventHandler( MyFrame1::Change_Angle ), NULL, this );
-
 	x_scrollBar->Disconnect( wxEVT_SCROLL_TOP, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );
 	x_scrollBar->Disconnect( wxEVT_SCROLL_BOTTOM, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );
 	x_scrollBar->Disconnect( wxEVT_SCROLL_LINEUP, wxScrollEventHandler( MyFrame1::Move_X ), NULL, this );

@@ -38,8 +38,8 @@ Matrix get_translation_matrix(double x, double y) {
 
 Matrix get_xreflection_matrix() {
     Matrix tmp;
-    tmp.data[0][0] = -1;
-    tmp.data[1][1] = 1;
+    tmp.data[0][0] = 1;
+    tmp.data[1][1] = -1;
 
     return tmp;
 }
@@ -121,13 +121,13 @@ int mirror(int index, int width, int height, Matrix matrix, double angle){
 
     vector = matrix * vector;
 
-    Matrix transform = get_translation_matrix(-width / 2, -height / 2) * get_xreflection_matrix() * get_translation_matrix(width / 2, height / 2);
+    //Matrix transform = get_translation_matrix(-width / 2, -height / 2) * get_rotation_matrix(angle) * get_xreflection_matrix() * get_rotation_matrix(-angle) * get_translation_matrix(width / 2, height / 2);
 
-    vector = get_rotation_matrix(-angle) * get_translation_matrix(width / 2, height / 2) * vector;
+    //vector = get_rotation_matrix(-angle) * get_translation_matrix(width / 2, height / 2) * vector;
 
-    if (vector.GetY() > 0) return -1;
+    //if (vector.GetY() > 0) return -1;
 
-    vector = get_translation_matrix(-width / 2, -height / 2) * get_rotation_matrix(angle) * get_xreflection_matrix() * vector;
+    //vector = get_translation_matrix(-width / 2, -height / 2) * get_rotation_matrix(angle) * get_xreflection_matrix() * vector;
 
 
     double new_x = vector.GetX();

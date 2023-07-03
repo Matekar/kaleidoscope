@@ -21,7 +21,7 @@
 #include <wx/image.h>
 #include <wx/icon.h>
 #include <wx/stattext.h>
-#include <wx/scrolbar.h>
+#include <wx/slider.h>
 #include <wx/choice.h>
 #include <wx/frame.h>
 
@@ -36,23 +36,16 @@ class MyFrame1 : public wxFrame
 
 	protected:
 		wxPanel* m_panel1;
-		wxButton* open_button;
-		wxButton* revert_button;
-		wxStaticText* count_staticText;
-		wxStaticText* countval_staticText;
-		wxStaticText* angle_staticText;
-		wxStaticText* angleval_staticText;
-		wxStaticText* x_staticText;
-		wxStaticText* xval_staticText;
-		wxStaticText* y_staticText;
-		wxStaticText* yval_staticText;
-		wxScrollBar* count_scrollBar;
-		wxScrollBar* angle_scrollBar;
-		wxScrollBar* x_scrollBar;
-		wxScrollBar* y_scrollBar;
-		wxChoice* interpolator_choice;
-		wxButton* save_button;
-		wxButton* animate_button;
+		wxButton* m_button1;
+		wxButton* m_button2;
+		wxStaticText* m_staticText2;
+		wxSlider* m_slider1;
+		wxSlider* m_slider4;
+		wxSlider* m_slider5;
+		wxSlider* m_slider6;
+		wxChoice* m_choice1;
+		wxButton* m_button3;
+		wxButton* m_button4;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OpenFile( wxCommandEvent& event ) { event.Skip(); }
@@ -63,12 +56,12 @@ class MyFrame1 : public wxFrame
 		virtual void Move_Y( wxScrollEvent& event ) { event.Skip(); }
 		virtual void Interpolate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void SaveFile( wxCommandEvent& event ) { event.Skip(); }
-		virtual void Animate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void whateverthisis( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
 
-		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 900,650 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~MyFrame1();
 
